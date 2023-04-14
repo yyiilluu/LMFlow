@@ -13,7 +13,7 @@ Typical usage example:
   foo = ClassFoo()
   bar = foo.FunctionBar()
 """
-
+import os
 import sys
 
 from transformers import HfArgumentParser
@@ -30,7 +30,7 @@ from lmflow.pipeline.auto_pipeline import AutoPipeline
 
 
 def main():
-	# Parses arguments
+    # Parses arguments
     pipeline_name = "finetuner"
     PipelineArguments = AutoArguments.get_pipeline_args_class(pipeline_name)
 
@@ -57,6 +57,7 @@ def main():
     # Tokenization and text grouping must be done in the main process
     with pipeline_args.main_process_first(desc="dataset map tokenization"):
         tokenized_dataset = model.tokenize(dataset)
+        import pdb; pdb.set_trace()
         lm_dataset = finetuner.group_text(
             tokenized_dataset,
             model_max_length=model.get_max_length(),

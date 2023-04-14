@@ -16,6 +16,7 @@ from transformers import (
     default_data_collator,
     set_seed,
 )
+from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import send_example_telemetry
 
 from lmflow.datasets.dataset import Dataset

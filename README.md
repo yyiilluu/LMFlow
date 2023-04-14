@@ -149,9 +149,10 @@ You may encounter some unexpected errors. You may try it first on a Linux machin
 ```bash
 git clone https://github.com/OptimalScale/LMFlow.git
 cd LMFlow
-conda create -n lmflow python=3.9 -y
-conda activate lmflow
-conda install mpi4py
+virualenv venv -p python ##(need to have > python 3.9)
+source venv/bin/activate
+brew install mpich
+pip install mpi4py
 pip install -e .
 ```
 

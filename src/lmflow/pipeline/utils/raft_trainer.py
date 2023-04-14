@@ -212,15 +212,15 @@ class RaftTrainer:
             The function to use to form a batch from a list of elements of `train_dataset` or `eval_dataset`. Will
             default to [`default_data_collator`] if no `tokenizer` is provided, an instance of
             [`DataCollatorWithPadding`] otherwise.
-        train_dataset (`torch.utils.data.Dataset` or `torch.utils.data.IterableDataset`, *optional*):
+        train_dataset (`torch.util.data.Dataset` or `torch.util.data.IterableDataset`, *optional*):
             The dataset to use for training. If it is a [`~datasets.Dataset`], columns not accepted by the
             `model.forward()` method are automatically removed.
-            Note that if it's a `torch.utils.data.IterableDataset` with some randomization and you are training in a
+            Note that if it's a `torch.util.data.IterableDataset` with some randomization and you are training in a
             distributed fashion, your iterable dataset should either use a internal attribute `generator` that is a
             `torch.Generator` for the randomization that must be identical on all processes (and the Trainer will
             manually set the seed of this `generator` at each epoch) or have a `set_epoch()` method that internally
             sets the seed of the RNGs used.
-        eval_dataset (Union[`torch.utils.data.Dataset`, Dict[str, `torch.utils.data.Dataset`]), *optional*):
+        eval_dataset (Union[`torch.util.data.Dataset`, Dict[str, `torch.util.data.Dataset`]), *optional*):
              The dataset to use for evaluation. If it is a [`~datasets.Dataset`], columns not accepted by the
              `model.forward()` method are automatically removed. If it is a dictionary, it will evaluate on each
              dataset prepending the dictionary key to the metric name.
@@ -804,7 +804,7 @@ class RaftTrainer:
 
     def get_train_dataloader(self) -> DataLoader:
         """
-        Returns the training [`~torch.utils.data.DataLoader`].
+        Returns the training [`~torch.util.data.DataLoader`].
         Will use no sampler if `train_dataset` does not implement `__len__`, a random sampler (adapted to distributed
         training if necessary) otherwise.
         Subclass and override this method if you want to inject some custom behavior.
@@ -881,10 +881,10 @@ class RaftTrainer:
 
     def get_eval_dataloader(self, eval_dataset: Optional[Dataset] = None) -> DataLoader:
         """
-        Returns the evaluation [`~torch.utils.data.DataLoader`].
+        Returns the evaluation [`~torch.util.data.DataLoader`].
         Subclass and override this method if you want to inject some custom behavior.
         Args:
-            eval_dataset (`torch.utils.data.Dataset`, *optional*):
+            eval_dataset (`torch.util.data.Dataset`, *optional*):
                 If provided, will override `self.eval_dataset`. If it is a [`~datasets.Dataset`], columns not accepted
                 by the `model.forward()` method are automatically removed. It must implement `__len__`.
         """
@@ -929,10 +929,10 @@ class RaftTrainer:
 
     def get_test_dataloader(self, test_dataset: Dataset) -> DataLoader:
         """
-        Returns the test [`~torch.utils.data.DataLoader`].
+        Returns the test [`~torch.util.data.DataLoader`].
         Subclass and override this method if you want to inject some custom behavior.
         Args:
-            test_dataset (`torch.utils.data.Dataset`, *optional*):
+            test_dataset (`torch.util.data.Dataset`, *optional*):
                 The test dataset to use. If it is a [`~datasets.Dataset`], columns not accepted by the
                 `model.forward()` method are automatically removed. It must implement `__len__`.
         """
@@ -1153,7 +1153,7 @@ class RaftTrainer:
 
     def num_examples(self, dataloader: DataLoader) -> int:
         """
-        Helper to get number of samples in a [`~torch.utils.data.DataLoader`] by accessing its dataset. When
+        Helper to get number of samples in a [`~torch.util.data.DataLoader`] by accessing its dataset. When
         dataloader.dataset does not exist or has no length, estimates as best it can
         """
         try:

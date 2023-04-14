@@ -4,7 +4,7 @@
 that contain the arguments for the model and dataset used in training.
 
 It imports several modules, including dataclasses, field from typing, Optional from typing,
-require_version from transformers.utils.versions, MODEL_FOR_CAUSAL_LM_MAPPING,
+require_version from transformers.util.versions, MODEL_FOR_CAUSAL_LM_MAPPING,
 and TrainingArguments from transformers.
 
 MODEL_CONFIG_CLASSES is assigned a list of the model config classes from

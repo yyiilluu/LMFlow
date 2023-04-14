@@ -228,7 +228,7 @@ class RaftAligner(BaseAligner):
                 The dataset to be loaded.
 
         Returns:
-            dataloader (`torch.utils.data.DataLoader`):
+            dataloader (`torch.util.data.DataLoader`):
                 The dataloader for the dataset.
         """
         ds = dataset.get_backend_dataset()
