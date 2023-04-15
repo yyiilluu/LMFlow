@@ -8,6 +8,7 @@ import os
 import sys
 
 import datasets
+import numpy as np
 import transformers
 
 from itertools import chain
@@ -16,7 +17,7 @@ from transformers import (
     default_data_collator,
     set_seed,
 )
-from transformers.trainer_utils import get_last_checkpoint
+from transformers.trainer_utils import get_last_checkpoint, EvalPrediction
 from transformers.utils import send_example_telemetry
 
 from lmflow.datasets.dataset import Dataset
@@ -202,6 +203,36 @@ class Finetuner(BaseTuner):
         finetuner_args = self.finetuner_args
         
         train_dataset = lm_dataset.get_backend_dataset()
+
+        # # You can define your custom compute_metrics function. It takes an `EvalPrediction` object (a namedtuple with a
+        # # predictions and label_ids field) and has to return a dictionary string to float.
+        # def compute_metrics(eval_preds: EvalPrediction):
+        #     def postprocess_text(preds, labels):
+        #         preds = [pred.strip() for pred in preds]
+        #         labels = [[label.strip()] for label in labels]
+        #
+        #         return preds, labels
+        #
+        #
+        #     preds, labels = eval_preds
+        #     if isinstance(preds, tuple):
+        #         preds = preds[0]
+        #     decoded_preds = model.get_tokenizer().batch_decode(preds, skip_special_tokens=True)
+        #     if data_args.ignore_pad_token_for_loss:
+        #         # Replace -100 in the labels as we can't decode them.
+        #         labels = np.where(labels != -100, labels, model.get_tokenizer().pad_token_id)
+        #     decoded_labels = model.get_tokenizer().batch_decode(labels, skip_special_tokens=True)
+        #
+        #     # Some simple post-processing
+        #     decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels)
+        #
+        #     result = metric.compute(predictions=decoded_preds, references=decoded_labels)
+        #     result = {"bleu": result["score"]}
+        #
+        #     prediction_lens = [np.count_nonzero(pred != model.get_tokenizer().pad_token_id) for pred in preds]
+        #     result["gen_len"] = np.mean(prediction_lens)
+        #     result = {k: round(v, 4) for k, v in result.items()}
+        #     return result
 
         if finetuner_args.do_train:
             if data_args.max_train_samples is not None:
