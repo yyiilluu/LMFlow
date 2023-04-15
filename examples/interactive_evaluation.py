@@ -46,11 +46,13 @@ class InteractiveEvaluator:
 
     def interactive_evaluate(self):
         while True:
-            text = input("Enter prompt")
-            inputs = self.model.encode(text, return_tensors="pt").to(device=self.local_rank)
+            text = input("Enter prompt: ")
+            formatted_input = f"Input: {text.strip()}"
+            inputs = self.model.encode(formatted_input, return_tensors="pt").to(device=self.local_rank)
             with torch.inference_mode():
                 outputs = self.model.inference(inputs, max_new_tokens=100, temperature=0.0)
                 text_out = self.model.decode(outputs[0], skip_special_tokens=True)
+                print("Generated content: \n")
                 print(text_out)
 
 

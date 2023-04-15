@@ -27,9 +27,7 @@ from peft import (
     LoraConfig,
     PeftModel,
     TaskType,
-    get_peft_config,
     get_peft_model,
-    prepare_model_for_int8_training,
 )
 
 import torch
@@ -45,10 +43,9 @@ from transformers import (
     AutoModelForCausalLM,
 )
 
-from lmflow.datasets.dataset import Dataset
 from lmflow.models.decoder_model import DecoderModel
 from lmflow.models.interfaces.tunable import Tunable
-
+from lmflow.utils.torch_util import get_max_memory
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +150,8 @@ class HFDecoderModel(DecoderModel, Tunable):
                     revision=model_args.model_revision,
                     use_auth_token=True if model_args.use_auth_token else None,
                     torch_dtype=torch_dtype,
+                    device_map="auto",
+                    max_memory=get_max_memory()
                 )
             else:
                 model = AutoModelForCausalLM.from_config(config)
@@ -212,6 +211,10 @@ class HFDecoderModel(DecoderModel, Tunable):
                     # Normal load
                     self.backend_model = AutoModelForCausalLM.from_pretrained(
                         model_args.model_name_or_path,
+                        cache_dir=model_args.cache_dir,
+                        device_map="auto",
+                        max_memory=get_max_memory()
+
                     )
             else:
                 if peft_model_id is not None:
