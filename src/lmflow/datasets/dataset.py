@@ -169,7 +169,7 @@ class Dataset:
             return self
         else:
             raise NotImplementedError(
-                f'Currently .from_dict is not supported for backend "{backend}"'
+                f'Currently .from_dict is not supported for backend "{self.backend}"'
             )
 
 
@@ -235,7 +235,7 @@ class Dataset:
             return dict_obj
         else:
             raise NotImplementedError(
-                f'Current .to_dict is not supported for backend "{backend}"'
+                f'Current .to_dict is not supported for backend "{self.backend}"'
             )
 
 
@@ -264,7 +264,7 @@ class Dataset:
         else:
             # If the backend is not Hugging Face, raise a NotImplementedError
             raise NotImplementedError(
-                f'Currently .map is not supported for backend "{backend}"'
+                f'Currently .map is not supported for backend "{self.backend}"'
             )
 
 
