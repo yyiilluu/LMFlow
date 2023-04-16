@@ -7,6 +7,6 @@
 deepspeed examples/interactive_evaluation.py \
     --answer_type text \
     --cache_dir /home/ec2-user/SageMaker/repos/LMFlow/cache \
-    --model_name_or_path chavinlo/gpt4-x-alpaca \
+    --model_name_or_path facebook/galactica-1.3b \
     --deepspeed examples/ds_config.json \
 #    --lora_model_path /home/ec2-user/SageMaker/repos/LMFlow/output_models/finetune_alpaca_with_lora \

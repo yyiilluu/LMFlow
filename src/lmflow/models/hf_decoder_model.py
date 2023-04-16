@@ -151,7 +151,9 @@ class HFDecoderModel(DecoderModel, Tunable):
                     use_auth_token=True if model_args.use_auth_token else None,
                     torch_dtype=torch_dtype,
                     device_map="auto",
-                    max_memory=get_max_memory()
+                    max_memory=get_max_memory(),
+                    offload_folder="offload",
+                    offload_state_dict=True,
                 )
             else:
                 model = AutoModelForCausalLM.from_config(config)
@@ -199,22 +201,21 @@ class HFDecoderModel(DecoderModel, Tunable):
                     # RAM-optimized load
                     self.backend_model = AutoModelForCausalLM.from_pretrained(
                         model_args.model_name_or_path,
+                        cache_dir=model_args.cache_dir,
                         device_map="auto",
+                        max_memory=get_max_memory(),
                         offload_folder="offload",
                         offload_state_dict=True,
                     )
-                except:
+                except Exception as e:
                     logger.warning(
-                        "Failed to use RAM optimized load. Automatically"
-                        " use original load instead."
+                        f"Failed to use RAM optimized load. Automatically"
+                        f" use original load instead. due to {e}"
                     )
                     # Normal load
                     self.backend_model = AutoModelForCausalLM.from_pretrained(
                         model_args.model_name_or_path,
                         cache_dir=model_args.cache_dir,
-                        device_map="auto",
-                        max_memory=get_max_memory()
-
                     )
             else:
                 if peft_model_id is not None:

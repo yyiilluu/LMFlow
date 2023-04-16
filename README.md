@@ -156,6 +156,18 @@ pip install mpi4py
 pip install -e .
 ```
 
+in AWS sagemaker notebook
+```bash
+git clone https://github.com/OptimalScale/LMFlow.git
+cd LMFlow
+conda create -n  my_custom_python_39 python=3.9 -y
+source ~/anaconda3/bin/activate
+conda activate my_custom_python_39
+conda install mpi4py -y
+pip install -e .
+```
+
+
 ## 2.Prepare Dataset
 You can easily download the example training dataset and test dataset by running 
 ```bash

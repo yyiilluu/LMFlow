@@ -6,18 +6,19 @@ if [ $# -ge 1 ]; then
   deepspeed_args="$1"
 fi
 
-exp_id=finetune_alpaca_with_lora
+exp_id=finetune_wa_t2t_with_lora
 project_dir=$(cd "$(dirname $0)"/..; pwd)
 output_dir=${project_dir}/output_models/${exp_id}
 log_dir=${project_dir}/log/${exp_id}
 
-dataset_path=${project_dir}/data/alpaca/train
+dataset_path=${project_dir}/data/wa/training_files/text2text
 
 mkdir -p ${output_dir} ${log_dir}
 
 deepspeed ${deepspeed_args} \
   examples/finetune.py \
     --model_name_or_path facebook/galactica-1.3b \
+    --cache_dir /home/ec2-user/SageMaker/repos/LMFlow/cache \
     --dataset_path ${dataset_path} \
     --output_dir ${output_dir} --overwrite_output_dir \
     --num_train_epochs 2 \
