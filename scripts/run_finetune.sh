@@ -8,30 +8,33 @@ if [ $# -ge 1 ]; then
   deepspeed_args="$1"
 fi
 
-exp_id=finetune
+exp_id=finetune_wa
 project_dir=$(cd "$(dirname $0)"/..; pwd)
 output_dir=${project_dir}/output_models/${exp_id}
 log_dir=${project_dir}/log/${exp_id}
 
-dataset_path=${project_dir}/data/alpaca/train
+dataset_path=${project_dir}/data/wa/training_files/textonly
 
 mkdir -p ${output_dir} ${log_dir}
 
 deepspeed ${deepspeed_args} \
   examples/finetune.py \
-    --model_name_or_path gpt2 \
+    --model_name_or_path andreaskoepf/pythia-2.8b-gpt4all-pretrain \
+    --cache_dir /home/ec2-user/SageMaker/repos/LMFlow/cache \
     --dataset_path ${dataset_path} \
     --output_dir ${output_dir} --overwrite_output_dir \
-    --num_train_epochs 0.01 \
+    --num_train_epochs 2 \
     --learning_rate 2e-5 \
     --block_size 512 \
-    --per_device_train_batch_size 1 \
+    --per_device_train_batch_size 2 \
+    --gradient_accumulation_steps 4 \
     --deepspeed configs/ds_config_zero3.json \
-    --bf16 \
+    --fp16 \
     --run_name finetune \
     --validation_split_percentage 0 \
     --logging_steps 20 \
     --do_train \
+    --report_to="none" \
     --ddp_timeout 72000 \
     --save_steps 5000 \
     --dataloader_num_workers 1 \
