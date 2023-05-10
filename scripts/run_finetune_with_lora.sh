@@ -21,7 +21,7 @@ deepspeed ${deepspeed_args} \
     --cache_dir /home/ec2-user/SageMaker/repos/LMFlow/cache \
     --dataset_path ${dataset_path} \
     --output_dir ${output_dir} --overwrite_output_dir \
-    --num_train_epochs 2 \
+    --num_train_epochs 1 \
     --learning_rate 1e-4 \
     --block_size 512 \
     --per_device_train_batch_size 4 \
