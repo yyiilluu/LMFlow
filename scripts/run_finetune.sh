@@ -8,18 +8,19 @@ if [ $# -ge 1 ]; then
   deepspeed_args="$1"
 fi
 
-exp_id=finetune_wa
+exp_id=pretraining_pythia_1b
 project_dir=$(cd "$(dirname $0)"/..; pwd)
 output_dir=${project_dir}/output_models/${exp_id}
 log_dir=${project_dir}/log/${exp_id}
 
-dataset_path=${project_dir}/data/wa/training_files/textonly
+dataset_path=/home/ec2-user/SageMaker/repos/test_data/processed
+# dataset_path=/home/ec2-user/SageMaker/repos/small_data
 
 mkdir -p ${output_dir} ${log_dir}
 
 deepspeed ${deepspeed_args} \
   examples/finetune.py \
-    --model_name_or_path andreaskoepf/pythia-2.8b-gpt4all-pretrain \
+    --model_name_or_path EleutherAI/pythia-1b-deduped \
     --cache_dir /home/ec2-user/SageMaker/repos/LMFlow/cache \
     --dataset_path ${dataset_path} \
     --output_dir ${output_dir} --overwrite_output_dir \

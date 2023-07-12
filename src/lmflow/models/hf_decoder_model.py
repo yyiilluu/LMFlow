@@ -109,7 +109,8 @@ class HFDecoderModel(DecoderModel, Tunable):
             if model_args.config_name:
                 config = AutoConfig.from_pretrained(model_args.config_name, **config_kwargs)
             elif model_args.model_name_or_path:
-                config = AutoConfig.from_pretrained(model_args.model_name_or_path, **config_kwargs)
+                config = AutoConfig.from_pretrained(model_args.model_name_or_path,
+                                                    trust_remote_code=True, **config_kwargs)
             else:
                 config = CONFIG_MAPPING[model_args.model_type]()
                 logger.warning("You are instantiating a new config instance from scratch.")
@@ -152,6 +153,7 @@ class HFDecoderModel(DecoderModel, Tunable):
                     torch_dtype=torch_dtype,
                     offload_folder="offload",
                     offload_state_dict=True,
+                    trust_remote_code=True,
                 )
             else:
                 model = AutoModelForCausalLM.from_config(config)
