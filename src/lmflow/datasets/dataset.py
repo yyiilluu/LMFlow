@@ -95,7 +95,7 @@ class Dataset:
                 split="train",
                 use_auth_token=None,
             )
-            self.backend_dataset = raw_dataset
+            self.backend_dataset = raw_dataset.shuffle(seed=42)
         elif backend == "json":
             # TODO (@Jiachun)
             pass
