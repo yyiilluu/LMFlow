@@ -1,14 +1,14 @@
 #!/bin/bash
 # Please run this script under ${project_id} in project directory of
 
-deepspeed_args="--master_port=11000"      # Default argument
-if [ $# -ge 1 ]; then
-  deepspeed_args="$1"
-fi
+# Parses arguments
+model_name_or_path=gpt2
+dataset_path=data/alpaca/train
+output_dir=output_models/finetune
+deepspeed_args="--master_port=11000"
 
 exp_id=finetune_wa_t2t_with_lora
 project_dir=$(cd "$(dirname $0)"/..; pwd)
-output_dir=${project_dir}/output_models/${exp_id}
 log_dir=${project_dir}/log/${exp_id}
 
 dataset_path=${project_dir}/data/wa/training_files/text2text

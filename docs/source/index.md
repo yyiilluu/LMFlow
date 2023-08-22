@@ -50,7 +50,7 @@ To emphasize its significance, we applied task tuning to LLaMA models on PubMedQ
 
 |                |  PubMedQA | MedQA-USMLE | MedMCQA |  Average |
 |:---------:|:--------:|:-----------:|:-------:|:----:|
-| Human (pass)   |  60.0   |     50.0    |         |      |
+| Human (pass)   |  | 60.0   |     50.0             |      |
 | Human (expert) |    78.0   |     87.0    |  90.0   | 85.0 |
 |   |      |              |    |  |
 |  InstructGPT 175B   |   73.2   |     46.0    |  44.0   | 54.4 |
@@ -134,6 +134,11 @@ Refer to [README](https://github.com/OptimalScale/LMFlow/blob/main/README.md).
 
 ## Content
 
+```{toctree}
+:maxdepth: 1
+
+blogs/index
+```
 
 ```{toctree}
 :maxdepth: 2
@@ -152,6 +157,20 @@ autoapi/index
 
 about/index
 ```
+
+## Vision
+Hello there! We are excited to announce the upcoming release of our code repository that includes a complete LLM training process, enabling users to quickly build their own language models and train them effectively.
+
+Our code repository is not just a simple model; it includes the complete training workflow, model optimization, and testing tools. You can use it to build various types of language models, including conversation models, question-answering models, and text generation models, among others.
+
+Moreover, we aim to create an open and democratic LLM sharing platform where people can share their checkpoints and experiences to collectively improve the skills of the community. We welcome anyone who is interested in LLM to participate and join us in building an open and friendly community!
+
+Whether you are a beginner or an expert, we believe that you can benefit from this platform. Let's work together to build a vibrant and innovative LLM community!
+
+[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/u9VJNpzhvA)
+[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1wju9nicy-woXbNtS~5MavHSAtiMxmxQ)
+[![WeChat badge](https://img.shields.io/badge/WeChat-Join-brightgreen?logo=wechat&amp)](https://s1.ax1x.com/2023/08/06/pPAQTPI.jpg)
+
 
 ## Citation
 

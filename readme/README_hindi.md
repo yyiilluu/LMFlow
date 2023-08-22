@@ -20,8 +20,8 @@
 [![Code License](https://img.shields.io/badge/Code%20License-Apache_2.0-green.svg)](https://github.com/OptimalScale/LMFlow/blob/main/LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
 [![Doc](https://img.shields.io/badge/Website-Doc-ff69b4.svg)](https://optimalscale.github.io/LMFlow/)
-[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/srGxyazbNs)
-[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1s6egx12s-THlwHuCjF6~JGKmx7JoJPA)
+[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/u9VJNpzhvA)
+[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1wju9nicy-woXbNtS~5MavHSAtiMxmxQ)
 [![WeChat badge](https://img.shields.io/badge/WeChat-Join-brightgreen?logo=wechat&amp)](https://i.328888.xyz/2023/04/04/ibvpAk.jpeg)
 
 एक विस्तारयोग्य, सुविधाजनक और दक्ष टूलबॉक्स जो बड़े मशीन लर्निंग मॉडल को finetune करने के लिए बनाया गया है, जो सभी समुदाय के उपयोगकर्ताओं के लिए उपलब्ध होने के साथ-साथ उपयोगकर्ता मित्रता, गति और विश्वसनीयता के साथ डिजाइन किया गया है।
@@ -37,7 +37,7 @@
 * [2023-04-02] [Web service is online!](https://lmflow.com/)
 * [2023-04-01] [Release Chinese checkpoints in model zoo: LLaMA-7B-tuned, LLaMA-13B-tuned, LLaMA-33B-tuned.](https://github.com/OptimalScale/LMFlow#model-zoo)
 * [2023-04-01] [Release English checkpoints in model zoo: LLaMA-7B-medical, LLaMA-13B-medical, and LLaMA-33B-medical.](https://github.com/OptimalScale/LMFlow#model-zoo)
-* [2023-03-27] [Support full tuning and lora tuning for all decoder models.](https://github.com/OptimalScale/LMFlow#supported-models) 
+* [2023-03-27] [Support full tuning and lora tuning for all decoder models.](https://github.com/OptimalScale/LMFlow#supported-models)
 * [2023-03-27] [Tasked tuned model beats ChatGPT on medical domain](https://github.com/OptimalScale/LMFlow#model-performance)
 * [2023-03-27] [Release code and checkpoints - version 0.0.1](https://optimalscale.github.io/LMFlow/)
 
@@ -109,7 +109,7 @@ LLaMA 33B (LoRA) की प्रदर्शन योग्यता एक �
 ## Model Zoo
 हमने प्रशिक्षित चेकपॉइंट को अधिक अभ्यास और अनुमान के लिए सभी के लिए ओपन-सोर्स कर दिया है।
 
-| Instruct-tuned Models   |  Status | Base Model | Download | 
+| Instruct-tuned Models   |  Status | Base Model | Download |
 |----------|:-------------:|----------|:-------------:|
 | LLaMA-7B-tuned | ![completed](https://geps.dev/progress/100) | LLaMA-7B | [Google Drive](https://drive.google.com/file/d/1x5JLae3akVkfFeDhSe3TEyUbPn_GNFyb/view?usp=share_link) |
 | LLaMA-13B-tuned | ![completed](https://geps.dev/progress/100) | LLaMA-13B |  [Google Drive](https://drive.google.com/file/d/1m_rpe6rNpN59kWvjJ3GfKeEmS-68TRYr/view?usp=share_link) |
@@ -157,7 +157,7 @@ pip install -e .
 cd data
 bash download.sh all
 cd -
-``` 
+```
 
 आप अपना खुद का डेटासेट भी निम्नलिखित स्वरूप में कनवर्ट करके उपयोग कर सकते हैं:
 ```json
@@ -231,6 +231,8 @@ deepspeed ${deepspeed_args} \
 ```python
 python examples/finetune.py -h
 ```
+नोट: एक छोटे से प्रशिक्षण डेटा सेट के मामले में, ``block_size`` के मान को कम करने की आवश्यकता है, अन्यथा एपोच इटरेटर में कोई नमूना उपलब्ध नहीं होगा।
+
 सभी संभव फाइन-ट्यूनिंग तर्क देखने के लिए आप निम्नलिखित कमांड का उपयोग कर सकते हैं। फाइन-ट्यून्ड मॉडल चेकपॉइंट `--output_dir` द्वारा निर्दिष्ट तर्क में सहेजा जाएगा, जो उपरोक्त उदाहरण में `output_models/finetune` है।
 ### 3.2 Run Evaluation
 
@@ -329,8 +331,8 @@ cd -
 इसके अतिरिक्त, हमारा लक्ष्य एक खुला और लोकतांत्रिक LLM साझा करने का मंच बनाना है जहां लोग अपने चेकपॉइंट और अनुभव साझा करके समुदाय के कौशलों को संगठित ढंग से सुधार सकते हैं। हम उन सभी लोगों का स्वागत करते हैं जो LLM में रूचि रखते हैं और एक खुले और मित्रवाही समुदाय का निर्माण करने में हमारे साथ शामिल होना चाहते हैं!
 
 चाहे आप एक शुरुआती हों या एक विशेषज्ञ, हम यह मानते हैं कि आप इस मंच से लाभ उठा सकते हैं। आओ हम साथ मिलकर एक जीवंत और नवाचारी LLM समुदाय का निर्माण करें!
-[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/srGxyazbNs)
-[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1s6egx12s-THlwHuCjF6~JGKmx7JoJPA)
+[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/u9VJNpzhvA)
+[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1wju9nicy-woXbNtS~5MavHSAtiMxmxQ)
 [![WeChat badge](https://img.shields.io/badge/WeChat-Join-brightgreen?logo=wechat&amp)](https://i.328888.xyz/2023/04/04/ibvpAk.jpeg)
 
 ## Disclaimer

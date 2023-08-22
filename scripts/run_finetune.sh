@@ -3,14 +3,14 @@
 #   https://github.com/shizhediao/llm-ft
 #     COMMIT: d5fecf30ba8011067b10cf51fede53a5ab6574e4
 
-deepspeed_args="--master_port=11000"      # Default argument
-if [ $# -ge 1 ]; then
-  deepspeed_args="$1"
-fi
+# Parses arguments
+model_name_or_path=gpt2
+dataset_path=data/alpaca/train
+output_dir=output_models/finetune
+deepspeed_args="--master_port=11000"
 
 exp_id=pretraining_pythia_1b_ft_compression
 project_dir=$(cd "$(dirname $0)"/..; pwd)
-output_dir=${project_dir}/output_models/${exp_id}
 log_dir=${project_dir}/log/${exp_id}
 
 

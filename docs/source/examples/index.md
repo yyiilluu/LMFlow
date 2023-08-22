@@ -10,9 +10,25 @@ We provide several examples to show how to use our package in your problem.
 DATASETS
 ```
 
+```{toctree}
+:maxdepth: 3
+
+checkpoints
+```
+
 ## Finetuning
 
-Refer to [examples](https://github.com/OptimalScale/LMFlow/blob/main/examples).
+For SFT, Refer to [examples](https://github.com/OptimalScale/LMFlow/blob/main/examples).
+
+
+For alignment process, 
+
+```{toctree}
+:maxdepth: 3
+
+reward_modeling
+```
+
 
 ```{toctree}
 :maxdepth: 3
@@ -24,5 +40,12 @@ raft
 
 Refer to [examples](https://github.com/OptimalScale/LMFlow/blob/main/examples).
 
+## Evaluation
+
+```{toctree}
+:maxdepth: 3
+
+TASK_GUIDE
+```
 
 

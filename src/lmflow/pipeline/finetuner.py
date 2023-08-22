@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # coding=utf-8
-"""The Finetuner class simplifies the process of running finetuning process on a language model for a TunableModel instance with given dataset. 
+"""The Finetuner class simplifies the process of running finetuning process on a language model for a TunableModel instance with given dataset.
 """
 
+import copy
 import logging
 import os
 import sys
@@ -10,18 +11,20 @@ import sys
 import datasets
 import numpy as np
 import transformers
-
+import evaluate
 from itertools import chain
 from transformers import (
     Trainer,
     default_data_collator,
     set_seed,
 )
-from transformers.trainer_utils import get_last_checkpoint, EvalPrediction
+from copy import deepcopy
 from transformers.utils import send_example_telemetry
+from transformers.trainer_utils import get_last_checkpoint
 
 from lmflow.datasets.dataset import Dataset
 from lmflow.pipeline.base_tuner import BaseTuner
+from lmflow.pipeline.utils.peft_trainer import PeftTrainer, PeftSavingCallback
 
 
 logger = logging.getLogger(__name__)
@@ -35,7 +38,7 @@ class Finetuner(BaseTuner):
     ------------
     model_args : ModelArguments object.
         Contains the arguments required to load the model.
-    
+
     data_args : DatasetArguments object.
         Contains the arguments required to load the dataset.
 
@@ -44,13 +47,13 @@ class Finetuner(BaseTuner):
 
     args : Optional.
         Positional arguments.
-    
+
     kwargs : Optional.
         Keyword arguments.
 
     """
     def __init__(self, model_args, data_args, finetuner_args, *args, **kwargs):
-        
+
         self.model_args = model_args
         self.data_args = data_args
         self.finetuner_args = finetuner_args
@@ -78,7 +81,7 @@ class Finetuner(BaseTuner):
         logger.warning(
             f"Process rank: {finetuner_args.local_rank},"
             f" device: {finetuner_args.device},"
-            f" n_gpu: {finetuner_args.n_gpu}"
+            f" n_gpu: {finetuner_args.n_gpu},"
             f"distributed training: {bool(finetuner_args.local_rank != -1)},"
             f" 16-bits training: {finetuner_args.fp16}"
         )
@@ -128,14 +131,27 @@ class Finetuner(BaseTuner):
                 block_size = 1024
         else:
             if data_args.block_size > model_max_length:
-                logger.warning(
-                    f"The block_size passed ({data_args.block_size}) is larger"
-	    			f" than the maximum length for the model"
-                    f"({model_max_length})."
-                    f" Using block_size={model_max_length}."
-                )
-            block_size = min(data_args.block_size, model_max_length)
-
+                if self.model_args.truncate_to_model_max_length:        
+                    logger.warning(
+                        f"The block_size passed ({data_args.block_size}) is larger"
+                        f" than the maximum length for the model"
+                        f"({model_max_length})."
+                        f" Using block_size={model_max_length}."
+                        f"If you would like to use a longer 'block_size' that is"
+                        f" longer than the maximum length supported by the model,"
+                        f" you can override this behavior with"
+                        f"default with `--truncate_to_model_max_length False`."
+                    )
+                    block_size = model_max_length
+                else:
+                    logger.warning(
+                        f"The block_size passed ({data_args.block_size}) is larger"
+                        f"than the maximum length for the model"
+                        f"({model_max_length})."
+                        f"Using block_size={data_args.block_size}.")
+                    block_size = data_args.block_size
+            else:
+                block_size = data_args.block_size
         # Main data processing function that will concatenate all texts from
         # our dataset and generate chunks of block_size.
         def group_texts(examples):
@@ -151,7 +167,6 @@ class Finetuner(BaseTuner):
                 k: [t[i : i + block_size] for i in range(0, total_length, block_size)]
                 for k, t in concatenated_examples.items()
             }
-            result["labels"] = result["input_ids"].copy()
             return result
 
         # Note that with `batched=True`, this map processes 1,000 texts
@@ -163,7 +178,7 @@ class Finetuner(BaseTuner):
         # of the map method for more information:
         # https://huggingface.co/docs/datasets/package_reference/main_classes.html#datasets.Dataset.map
         with finetuner_args.main_process_first(desc="grouping texts together"):
-            group_batch_size = 1000
+            group_batch_size = data_args.group_texts_batch_size
             if data_args.disable_group_texts:
                 group_batch_size = 1
             if not data_args.streaming:
@@ -185,7 +200,7 @@ class Finetuner(BaseTuner):
         return lm_datasets
 
 
-    def tune(self, model, lm_dataset):
+    def tune(self, model, dataset, transform_dataset_in_place=True):
         """
         Perform tuning for a model
 
@@ -193,46 +208,57 @@ class Finetuner(BaseTuner):
         ------------
         model : TunableModel object.
             TunableModel to perform tuning.
-        
-        lm_dataset:
+
+        dataset:
             dataset to train model.
 
-        """   
+        """
         model_args = self.model_args
         data_args = self.data_args
         finetuner_args = self.finetuner_args
-        
+        if not transform_dataset_in_place:
+            dataset = copy.deepcopy(dataset)
+
+        # Tokenization and text grouping must be done in the main process
+        with finetuner_args.main_process_first(desc="dataset map tokenization"):
+            tokenized_dataset = model.tokenize(dataset)
+            lm_dataset = self.group_text(
+                tokenized_dataset,
+                model_max_length=model.get_max_length(),
+            )
+
         train_dataset = lm_dataset.get_backend_dataset()
 
-        # # You can define your custom compute_metrics function. It takes an `EvalPrediction` object (a namedtuple with a
-        # # predictions and label_ids field) and has to return a dictionary string to float.
-        # def compute_metrics(eval_preds: EvalPrediction):
-        #     def postprocess_text(preds, labels):
-        #         preds = [pred.strip() for pred in preds]
-        #         labels = [[label.strip()] for label in labels]
-        #
-        #         return preds, labels
-        #
-        #
-        #     preds, labels = eval_preds
-        #     if isinstance(preds, tuple):
-        #         preds = preds[0]
-        #     decoded_preds = model.get_tokenizer().batch_decode(preds, skip_special_tokens=True)
-        #     if data_args.ignore_pad_token_for_loss:
-        #         # Replace -100 in the labels as we can't decode them.
-        #         labels = np.where(labels != -100, labels, model.get_tokenizer().pad_token_id)
-        #     decoded_labels = model.get_tokenizer().batch_decode(labels, skip_special_tokens=True)
-        #
-        #     # Some simple post-processing
-        #     decoded_preds, decoded_labels = postprocess_text(decoded_preds, decoded_labels)
-        #
-        #     result = metric.compute(predictions=decoded_preds, references=decoded_labels)
-        #     result = {"bleu": result["score"]}
-        #
-        #     prediction_lens = [np.count_nonzero(pred != model.get_tokenizer().pad_token_id) for pred in preds]
-        #     result["gen_len"] = np.mean(prediction_lens)
-        #     result = {k: round(v, 4) for k, v in result.items()}
-        #     return result
+        if finetuner_args.do_eval:
+            eval_dataset_args = deepcopy(data_args)
+            eval_dataset_args.dataset_path = finetuner_args.eval_dataset_path
+            eval_dataset = Dataset(eval_dataset_args)
+            with finetuner_args.main_process_first(desc="dataset map tokenization"):
+                tokenized_dataset = model.tokenize(eval_dataset)
+                lm_dataset = self.group_text(
+                    tokenized_dataset,
+                    model_max_length=model.get_max_length(),
+                )
+            eval_dataset = lm_dataset.get_backend_dataset()
+
+
+            def preprocess_logits_for_metrics(logits, labels):
+                if isinstance(logits, tuple):
+                    # Depending on the model and config, logits may contain extra tensors,
+                    # like past_key_values, but logits always come first
+                    logits = logits[0]
+                return logits.argmax(dim=-1)
+
+            metric = evaluate.load("accuracy")
+
+            def compute_metrics(eval_preds):
+                # import pdb; pdb.set_trace()
+                preds, labels = eval_preds
+                # preds have the same shape as the labels, after the argmax(-1) has been calculated
+                # by preprocess_logits_for_metrics but we need to shift the labels
+                labels = labels[:, 1:].reshape(-1)
+                preds = preds[:, :-1].reshape(-1)
+                return metric.compute(predictions=preds, references=labels)
 
         if finetuner_args.do_train:
             if data_args.max_train_samples is not None:
@@ -241,16 +267,25 @@ class Finetuner(BaseTuner):
 
         # Initialize our Trainer
         training_args = finetuner_args
-        trainer = Trainer(
+
+        if model_args.use_lora:
+            FinetuningTrainer = PeftTrainer
+            trainer_callbacks = [PeftSavingCallback]
+        else:
+            FinetuningTrainer = Trainer
+            trainer_callbacks = []
+
+        trainer = FinetuningTrainer(
             model=model.get_backend_model(),
             args=training_args,
             train_dataset=train_dataset if training_args.do_train else None,
-            eval_dataset=None,
+            eval_dataset=eval_dataset if training_args.do_eval else None,
             tokenizer=model.get_tokenizer(),
             # Data collator will default to DataCollatorWithPadding, so we change it.
             data_collator=default_data_collator,
-            compute_metrics=None,
-            preprocess_logits_for_metrics=None,
+            compute_metrics=compute_metrics if training_args.do_eval else None,
+            preprocess_logits_for_metrics=preprocess_logits_for_metrics if training_args.do_eval else None,
+            callbacks=trainer_callbacks
         )
 
         # Training
@@ -269,8 +304,6 @@ class Finetuner(BaseTuner):
                 if model_args.save_aggregated_lora:
                     model.merge_lora_weights()
                 model.save(finetuner_args.output_dir,model_args.save_aggregated_lora)
-                    
-                
 
             metrics = train_result.metrics
 

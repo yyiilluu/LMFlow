@@ -5,6 +5,9 @@
 """
 import logging
 import json
+import os
+import sys
+sys.path.remove(os.path.abspath(os.path.dirname(sys.argv[0])))
 import warnings
 
 from dataclasses import dataclass, field
@@ -35,19 +38,6 @@ class ChatbotArguments:
             "help": "end string mark of the chatbot's output"
         },
     )
-    max_new_tokens: Optional[int] = field(
-        default=200,
-        metadata={
-            "help": "maximum number of generated tokens"
-        },
-    )
-    temperature: Optional[float] = field(
-        default=0.7,
-        metadata={
-            "help": "higher this value, more random the model output"
-        },
-    )
-
 
 def main():
     pipeline_name = "inferencer"
@@ -61,6 +51,7 @@ def main():
     model_args, pipeline_args, chatbot_args = (
         parser.parse_args_into_dataclasses()
     )
+    inferencer_args = pipeline_args
 
     with open (pipeline_args.deepspeed, "r") as f:
         ds_config = json.load(f)
@@ -95,7 +86,7 @@ def main():
         f"#############################################################################\n"
         "\n"
     )
-    print(guide_message, end="")
+    print(guide_message)
 
     # context = (
     #     "You are a helpful assistant who follows the given instructions"
@@ -108,36 +99,55 @@ def main():
 
     while True:
         input_text = input("User >>> ")
-        if not input_text:
+        if input_text == "exit":
             print("exit...")
             break
+        elif input_text == "reset":
+            context = ""
+            print("Chat history cleared")
+            continue
+        if not input_text:
+            input_text = " "
 
         context += prompt_structure.format(input_text=input_text)
+        context = context[-model.get_max_length():]     # Memory of the bot
 
         input_dataset = dataset.from_dict({
             "type": "text_only",
             "instances": [ { "text": context } ]
         })
 
-        output_dataset = inferencer.inference(
+        print("Bot: ", end="")
+        print_index = 0
+
+        token_per_step = 4
+
+        for response, flag_break in inferencer.stream_inference(
+            context=context,
             model=model,
-            dataset=input_dataset,
-            max_new_tokens=chatbot_args.max_new_tokens,
-            temperature=chatbot_args.temperature,
-        )
+            max_new_tokens=inferencer_args.max_new_tokens,
+            token_per_step=token_per_step,
+            temperature=inferencer_args.temperature,
+            end_string=end_string,
+            input_dataset=input_dataset
+        ):
+            # Prints characters in the buffer
+            new_print_index = print_index
+            for char in response[print_index:]:
+                if end_string is not None and char == end_string[0]:
+                    if new_print_index + len(end_string) >= len(response):
+                        break
 
-        response = output_dataset.to_dict()["instances"][0]["text"]
+                new_print_index += 1
+                print(char, end="", flush=True)
 
-        try:
-            index = response.index(end_string)
-        except ValueError:
-            response += end_string
-            index = response.index(end_string)
+            print_index = new_print_index
 
-        response = response[:index]
-        print("Bot: " + response, end="\n")
+            if flag_break:
+                break
+        print("\n", end="")
+
         context += response + "\n"
-        context = context[-model.get_max_length():]     # Memory of the bot
 
 
 if __name__ == "__main__":

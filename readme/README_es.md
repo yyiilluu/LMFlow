@@ -20,9 +20,9 @@ La versión en español fue traducida por ChatGPT, si hay algún error, bienveni
 [![Code License](https://img.shields.io/badge/Code%20License-Apache_2.0-green.svg)](https://github.com/OptimalScale/LMFlow/blob/main/LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
 [![Doc](https://img.shields.io/badge/Website-Doc-ff69b4.svg)](https://optimalscale.github.io/LMFlow/)
-[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/srGxyazbNs)
+[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/u9VJNpzhvA)
 [![WeChat badge](https://img.shields.io/badge/Wechat-Join-brightgreen?logo=wechat&amp)](https://i.328888.xyz/2023/04/05/i8gG4z.jpeg)
-[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1s6egx12s-THlwHuCjF6~JGKmx7JoJPA)
+[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1wju9nicy-woXbNtS~5MavHSAtiMxmxQ)
 
 
 Una caja de herramientas extensible, conveniente y eficiente para ajustar modelos de aprendizaje automático grandes, diseñada para ser fácil de usar, rápida, confiable y accesible para toda la comunidad.
@@ -39,7 +39,7 @@ Modelo de Lenguaje Grande para Todos. Vea nuestra [visión](https://github.com/O
 * [2023-04-02] [Web service is online!](https://lmflow.com/)
 * [2023-04-01] [Release Chinese checkpoints in model zoo: LLaMA-7B-tuned, LLaMA-13B-tuned, LLaMA-33B-tuned.](https://github.com/OptimalScale/LMFlow#model-zoo)
 * [2023-04-01] [Release English checkpoints in model zoo: LLaMA-7B-medical, LLaMA-13B-medical, and LLaMA-33B-medical.](https://github.com/OptimalScale/LMFlow#model-zoo)
-* [2023-03-27] [Support full tuning and lora tuning for all decoder models.](https://github.com/OptimalScale/LMFlow#supported-models) 
+* [2023-03-27] [Support full tuning and lora tuning for all decoder models.](https://github.com/OptimalScale/LMFlow#supported-models)
 * [2023-03-27] [Tasked tuned model beats ChatGPT on medical domain](https://github.com/OptimalScale/LMFlow#model-performance)
 * [2023-03-27] [Release code and checkpoints - version 0.0.1](https://optimalscale.github.io/LMFlow/)
 
@@ -108,7 +108,7 @@ El rendimiento de LLaMA 33B (LoRA) se logra con solo **~16h** de ajuste fino en 
 ## Model Zoo
 Hemos hecho públicos los checkpoints entrenados para que todos puedan utilizarlos para un mayor entrenamiento e inferencia.
 
-| Instruct-tuned Models   |  Status | Base Model | Download | 
+| Instruct-tuned Models   |  Status | Base Model | Download |
 |----------|:-------------:|----------|:-------------:|
 | LLaMA-7B-tuned | ![completed](https://geps.dev/progress/100) | LLaMA-7B | [Google Drive](https://drive.google.com/file/d/1x5JLae3akVkfFeDhSe3TEyUbPn_GNFyb/view?usp=share_link) |
 | LLaMA-13B-tuned | ![completed](https://geps.dev/progress/100) | LLaMA-13B |  [Google Drive](https://drive.google.com/file/d/1m_rpe6rNpN59kWvjJ3GfKeEmS-68TRYr/view?usp=share_link) |
@@ -154,7 +154,7 @@ Puedes descargar fácilmente los conjuntos de datos de entrenamiento y prueba de
 cd data
 bash download.sh all
 cd -
-``` 
+```
 
 También puedes utilizar tu propio conjunto de datos simplemente convirtiéndolo al siguiente formato:
 ```json
@@ -187,6 +187,7 @@ Puedes ejecutar `scripts/run_finetune.sh` para ajustar finamente un modelo base 
 ```sh
 ./scripts/run_finetune.sh
 ```
+Note: In the case of a small training data set, the value of ``block_size`` needs to be reduced, otherwise there will be no samples available in the Epoch iterator.
 
 Si deseas proporcionar argumentos para DeepSpeed que reflejen la configuración de tu máquina, puedes pasar los argumentos correspondientes a DeepSpeed al script. Por ejemplo:
 ```sh
@@ -227,6 +228,7 @@ deepspeed ${deepspeed_args} \
 ```python
 python examples/finetune.py -h
 ```
+Nota: En el caso de un conjunto de datos de entrenamiento pequeño, es necesario reducir el valor de ``block_size``, de lo contrario no habrá muestras disponibles en el iterador Epoch.
 
 ### 3.2 Run Evaluation
 
@@ -304,8 +306,8 @@ Además, nuestro objetivo es crear una plataforma abierta y democrática de inte
 
 Ya seas principiante o experto, creemos que puedes beneficiarte de esta plataforma. ¡Trabajemos juntos para construir una comunidad vibrante e innovadora de LLM!
 
-[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/srGxyazbNs)
-[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1s6egx12s-THlwHuCjF6~JGKmx7JoJPA)
+[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/u9VJNpzhvA)
+[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1wju9nicy-woXbNtS~5MavHSAtiMxmxQ)
 [![WeChat badge](https://img.shields.io/badge/WeChat-Join-brightgreen?logo=wechat&amp)](https://i.328888.xyz/2023/04/05/i8gG4z.jpeg)
 
 
@@ -338,5 +340,3 @@ Si encuentras este repositorio útil, por favor considera darle ⭐ y citarlo:
   howpublished = {\url{https://optimalscale.github.io/LMFlow/}},
 }
 ```
-
-

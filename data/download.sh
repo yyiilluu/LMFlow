@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function main() {
-    public_server="http://18.207.214.227:5000"
+    public_server="http://lmflow.org:5000"
     if [ $# -lt 1 -o "$1" = "-h" -o "$1" = "--help" ]; then
         echo "Usage: bash $(basename $0) dataset_name"
         echo "Example: bash $(basename $0) MedMCQA"
@@ -87,6 +87,104 @@ function main() {
         tar zxvf ${filename}
         rm ${filename}
     fi
-}
+    
+    if [ "$1" = "gpt4_zh_eval" -o "$1" = "all" ]; then
+        echo "downloading gpt4_zh_eval dataset"
+        filename='gpt4_instruction_zh_eval.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+    
+    if [ "$1" = "multiturn_dialog_eval" -o "$1" = "all" ]; then
+        echo "downloading multiturn_dialog_eval dataset"
+        filename='multiturn_dialog_eval.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+    
+    if [ "$1" = "wiki_zh_eval" -o "$1" = "all" ]; then
+        echo "downloading wiki_zh_eval dataset"
+        filename='wiki_zh_eval.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
 
+    if [ "$1" = "wiki_en_eval" -o "$1" = "all" ]; then
+        echo "downloading wiki_en_eval dataset"
+        filename='wiki_en_eval.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+    
+    if [ "$1" = "wiki_en_eval" -o "$1" = "all" ]; then
+        echo "downloading wiki_en_eval dataset"
+        filename='wiki_en_eval.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+    
+    if [ "$1" = "gpt4_en_eval" -o "$1" = "all" ]; then
+        echo "downloading gpt4_en_eval dataset"
+        filename='gpt4_instruction_en_eval.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+    
+    if [ "$1" = "common_sense_eval" -o "$1" = "all" ]; then
+        echo "downloading common_sense_eval dataset"
+        filename='common_sense_eval.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+
+    if [ "$1" = "hh_rlhf" -o "$1" = "all" ]; then
+        echo "downloading hh_rlhf dataset"
+        filename='hh_rlhf.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+
+    if [ "$1" = "lmflow_chat_cn_dialog_multiturn_nll_text2text_nosharp" -o "$1" = "all" ]; then
+        echo "downloading lmflow_chat_cn_dialog_multiturn_nll_text2text_nosharp dataset"
+        filename='lmflow_chat_cn_dialog_multiturn_nll_text2text_nosharp.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+
+    if [ "$1" = "lmflow_chat_cn_dialog_multiturn_single_nll_text2text" -o "$1" = "all" ]; then
+        echo "downloading lmflow_chat_cn_dialog_multiturn_single_nll_text2text dataset"
+        filename='lmflow_chat_cn_dialog_multiturn_single_nll_text2text.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+
+    if [ "$1" = "lmflow_chat_en_dialog_multiturn_nll_text2text_nosharp" -o "$1" = "all" ]; then
+        echo "downloading lmflow_chat_en_dialog_multiturn_nll_text2text_nosharp dataset"
+        filename='lmflow_chat_en_dialog_multiturn_nll_text2text_nosharp.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+
+    if [ "$1" = "lmflow_chat_en_dialog_multiturn_single_nll_text2text" -o "$1" = "all" ]; then
+        echo "downloading lmflow_chat_en_dialog_multiturn_single_nll_text2text dataset"
+        filename='lmflow_chat_en_dialog_multiturn_single_nll_text2text.tar.gz'
+        wget ${public_server}/${filename}
+        tar zxvf ${filename}
+        rm ${filename}
+    fi
+}
 main "$@"
+
+
+

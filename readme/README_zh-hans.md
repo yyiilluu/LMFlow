@@ -18,9 +18,9 @@
 [![Code License](https://img.shields.io/badge/Code%20License-Apache_2.0-green.svg)](https://github.com/OptimalScale/LMFlow/blob/main/LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
 [![Doc](https://img.shields.io/badge/Website-Doc-ff69b4.svg)](https://optimalscale.github.io/LMFlow/)
-[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/srGxyazbNs)
+[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/u9VJNpzhvA)
 [![WeChat badge](https://img.shields.io/badge/微信-加入-brightgreen?logo=wechat&amp)](https://i.328888.xyz/2023/04/05/i8gG4z.jpeg)
-[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1s6egx12s-THlwHuCjF6~JGKmx7JoJPA)
+[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1wju9nicy-woXbNtS~5MavHSAtiMxmxQ)
 
 一个可扩展、方便和高效的工具箱，用于微调大型机器学习模型。我们的目标是开发一套用户友好、快速可靠，并对整个社区开放的全流程微调代码库。
 
@@ -153,7 +153,7 @@ pip install -e .
 cd data
 bash download.sh all
 cd -
-``` 
+```
 
 您也可以将您的数据转换成以下格式来使用自己的数据集:
 ```json
@@ -225,6 +225,8 @@ deepspeed ${deepspeed_args} \
 ```python
 python examples/finetune.py -h
 ```
+
+注意：在训练数据集容量比较小的情况下，需要减小```block_size```的值，否则会出现Epoch 迭代器中没有可用的样本的情况。
 
 ### 3.2 Run Evaluation
 
@@ -298,9 +300,9 @@ cd -
 
 无论您是初学者还是专家，我们相信大家都能从这个平台中获益。让我们共同努力，建立一个充满活力和创新的大模型社区！
 
-[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/srGxyazbNs)
+[![Embark](https://img.shields.io/badge/discord-LMFlow-%237289da.svg?logo=discord)](https://discord.gg/u9VJNpzhvA)
 [![WeChat badge](https://img.shields.io/badge/微信-加入-brightgreen?logo=wechat&amp)](https://i.328888.xyz/2023/04/05/i8gG4z.jpeg)
-[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1s6egx12s-THlwHuCjF6~JGKmx7JoJPA)
+[![slack badge](https://img.shields.io/badge/Slack-join-blueviolet?logo=slack&amp)](https://join.slack.com/t/lmflow/shared_invite/zt-1wju9nicy-woXbNtS~5MavHSAtiMxmxQ)
 
 ## Disclaimer
 
@@ -313,6 +315,8 @@ cd -
 ## Support
 如果您需要任何帮助，请提交[Github](https://github.com/OptimalScale/LMFlow)问题。
 
+## 协议
+本项目所含代码采用Apache 2.0协议。如果您希望将本项目所含模型用于商业用途，请填写并签署[本文件](https://docs.google.com/forms/d/e/1FAIpQLSertnFbm2_aELsPMwOu_DhAu3p7bQgv8_MWSug7D80AyzPLhg/viewform?usp=pp_url)取得授权。
 
 ## Contributors
 <a href="https://github.com/OptimalScale/LMFlow/graphs/contributors">

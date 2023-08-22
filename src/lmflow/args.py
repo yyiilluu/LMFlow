@@ -13,7 +13,7 @@ extracted from the MODEL_CONFIG_CLASSES.
 """
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, List
 
 from transformers.utils.versions import require_version
 
@@ -75,6 +75,8 @@ class ModelArguments:
     use_ram_optimized_load : bool
         a boolean indicating whether to use disk mapping when memory is not
         enough.
+    use_int8 : bool
+        a boolean indicating whether to load int8 quantization for inference.
     """
 
     model_name_or_path: Optional[str] = field(
@@ -99,6 +101,10 @@ class ModelArguments:
         default=None,
         metadata={"help": "If training from scratch, pass a model type from the list: " + ", ".join(MODEL_TYPES)},
     )
+    arch_type: Optional[str] = field(
+        default="decoder_only",
+        metadata={"help": "The architecture type of the model. Currently supported decoder_only or encoder_decoder"}
+    )
     config_overrides: Optional[str] = field(
         default=None,
         metadata={
@@ -115,7 +121,7 @@ class ModelArguments:
                 "Model architecture type, e.g. \"decoder_only\","
                 " \"encoder_decoder\""
             ),
-            "choices": ["decoder_only", "encoder_decoder", "text_regression"],
+            "choices": ["decoder_only", "encoder_decoder", "text_regression", "vision_encoder_decoder"],
         },
     )
     config_name: Optional[str] = field(
@@ -145,6 +151,14 @@ class ModelArguments:
             )
         },
     )
+    trust_remote_code : bool = field(
+        default=False,
+        metadata={
+            "help": (
+                "Whether to trust remote code when loading model."
+            )
+        },
+    )
     torch_dtype: Optional[str] = field(
         default=None,
         metadata={
@@ -159,6 +173,24 @@ class ModelArguments:
         default=False,
         metadata={"help": "Whether to lora."},
     )
+    use_qlora: bool = field(
+        default=False,
+        metadata={"help": "Whether to use qlora."},
+    )
+    bits: int = field(
+        default=4,
+        metadata={"help": "The number of bits for quantization.",
+                  "choices": [4, 8],},
+    )
+    quant_type: str = field(
+        default='nf4',
+        metadata={"help": "The quantization type for quantization.",
+                  "choices": ["nf4", "fp4"],},
+    )
+    double_quant: bool = field(
+        default=True,
+        metadata={"help": "Whether to use double quantization."},
+    )
     lora_r: int = field(
         default=8,
         metadata={"help": "the rank of the lora parameters. The smaller lora_r is , the fewer parameters lora has."},
@@ -166,6 +198,10 @@ class ModelArguments:
     lora_alpha: int = field(
         default=32,
         metadata={"help": "Merging ratio between the fine-tuned model and the original. This is controlled by a parameter called alpha in the paper."},
+    )
+    lora_target_modules: List[str] = field(
+        default=None, metadata={"help": "Pretrained config name or path if not the same as model_name",
+                              }
     )
     lora_dropout: float = field(
         default=0.1,
@@ -179,12 +215,96 @@ class ModelArguments:
         default=True,
         metadata={"help": "Whether use disk mapping when memory is not enough."}
     )
+    use_flash_attention: bool = field(
+        default=False,
+        metadata={
+            "help": (
+                "whether use flash attention layer to reduce GPU memory with"
+                " higher time cost."
+            )
+        }
+    )
+    truncate_to_model_max_length: bool = field(
+        default=True,
+        metadata={
+            "help": (
+                "whether truncate the dataset to model max length."
+            )
+        }
+    )
+    do_rope_scaling: bool = field(
+        default = False,
+        metadata={
+            "help": (
+                "whether do ROPE scaling for llama model."
+                "Linear_scaling credits to the Reddit user /u/kaiokendev."
+                "https://arxiv.org/abs/2306.15595"
+                "NTK_scaling credits to the Reddit users /u/bloc97 and /u/emozilla."
+                "https://www.reddit.com/r/LocalLLaMA/comments/14lz7j5/ntkaware_scaled_rope_allows_llama_models_to_have/"
+            )
+        }   
+    )
+    rope_pi_ratio: int = field(
+        default=1,
+        metadata={
+            "help": (
+                "the ratio of pi in RoPE scaling."
+            )
+        }
+    )
+    rope_ntk_ratio: int = field(
+        default=1,
+        metadata={
+            "help": (
+                "the ratio of NTK in RoPE scaling."
+            )
+        }
+    )
+    use_int8: bool = field(
+        default=False,
+        metadata={"help": "whether to load int8 quantization for inference"}
+    )
 
     def __post_init__(self):
         if self.config_overrides is not None and (self.config_name is not None or self.model_name_or_path is not None):
             raise ValueError(
                 "--config_overrides can't be used in combination with --config_name or --model_name_or_path"
             )
+
+
+@dataclass
+class VisModelArguments(ModelArguments):
+    low_resource: Optional[bool] = field(
+        default=False,
+        metadata={
+            "help": "Use 8 bit and float16 when loading llm"
+        }
+    )
+    custom_model: bool = field(
+        default=False,
+        metadata={"help": "flag for the model from huggingface or not"}
+    )
+    checkpoint_path: str = field(
+        default=None,
+        metadata={"help": "path for model checkpoint"}
+    )
+    llm_model_name_or_path: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": (
+                "llm model in multi-modality model"
+            )
+        },
+    )
+    use_prompt_cache: bool = field(
+        default=False,
+        metadata={"help": "Whether to use prompt cache."},
+    )
+    prompt_cache_path: Optional[str] = field(
+        default=None,
+        metadata={"help": "Path to prompt cache."},
+    )
+
 
 
 @dataclass
@@ -302,6 +422,16 @@ class DatasetArguments:
         default=None,
         metadata={"help": "The number of processes to use for the preprocessing."},
     )
+    group_texts_batch_size: int = field(
+        default=1000,
+        metadata={
+            "help": (
+                "Number of samples that will be grouped together to go though"
+                " `group_texts` operation. See `--disable_group_texts` for"
+                " detailed explanation of this operation."
+            )
+        }
+    )
     disable_group_texts: bool = field(
         default=False,
         metadata={
@@ -344,7 +474,9 @@ class FinetunerArguments(TrainingArguments):
     """
     Adapt transformers.TrainingArguments
     """
-    pass
+    eval_dataset_path: Optional[str] = field(
+        default=None, metadata={"help": "The path of the eval dataset to use."}
+    )
 
 
 @dataclass
@@ -370,6 +502,12 @@ class EvaluatorArguments:
     deepspeed : 
         Enable deepspeed and pass the path to deepspeed json config file (e.g. ds_config.json) or an already
         loaded json file as a dict
+        
+    temperature : float
+        An argument of model.generate in huggingface to control the diversity of generation.
+        
+    repetition_penalty : float
+        An argument of model.generate in huggingface to penalize repetitions.
     """
     local_rank: int = field(
         default=-1,
@@ -470,11 +608,38 @@ class EvaluatorArguments:
         default="accuracy",
         metadata={
             "help": "the metric the model will be evaluated on",
-            "choices": ["ppl", "accuracy"],
+            "choices": ["ppl", "perplexity", "acc", "accuracy", "nll", "neg_log_likelihood"],
         },
     )
-
-
+    inference_batch_size_per_device: Optional[int] = field(
+        default=1,
+        metadata={
+            "help": (
+                "every device will infer {inference_batch_size_per_device}"
+                " samples in parallel. The inferred results will be concatenaed"
+                " with inputs and attach a reward."
+            ),
+        },
+    )
+    use_accelerator_for_evaluator: bool = field(
+        default=False, metadata={"help": "Whether to use Huggingface Accelerator instead of Deepspeed"},
+    )
+        
+    temperature: float = field(
+        default=0,
+        metadata={"help": "Temperature during inference."},
+    )
+    
+    repetition_penalty: float = field(
+        default=1,
+        metadata={"help": "Repetition_penalty during inference."},
+    )
+        
+    max_new_tokens: int = field(
+        default=100,
+        metadata={"help": "Maximum length during inference."},
+    )
+    
 @dataclass
 class InferencerArguments:
     """
@@ -491,7 +656,12 @@ class InferencerArguments:
         loaded json file as a dict
     mixed_precision : str, choice from ["bf16","fp16"].
         mixed precision mode, whether to use bf16 or fp16
-
+    
+    temperature : float
+        An argument of model.generate in huggingface to control the diversity of generation.
+        
+    repetition_penalty : float
+        An argument of model.generate in huggingface to penalize repetitions.
     """
     device: str = field(
         default="gpu",
@@ -503,8 +673,24 @@ class InferencerArguments:
     local_rank: int = field(
         default=-1,
         metadata={"help": "For distributed training: local_rank"
-        }
+        },
     )
+        
+    temperature: float = field(
+        default=0.0,
+        metadata={"help": "Temperature during inference."},
+    )
+    
+    repetition_penalty: float = field(
+        default=1,
+        metadata={"help": "Repetition_penalty during inference."},
+    )
+        
+    max_new_tokens: int = field(
+        default=100,
+        metadata={"help": "Maximum length during inference."},
+    )
+        
     random_seed: Optional[int] = field(
         default=1,
         metadata={
@@ -531,7 +717,12 @@ class InferencerArguments:
             "choices": ["bf16","fp16"],
         },
     )
-
+    do_sample: Optional[bool] = field(
+        default=False,
+        metadata={
+            "help": "whether turn on true random sampling during inference."
+        },
+    )
 
 @dataclass
 class RaftAlignerArguments(TrainingArguments):
@@ -545,7 +736,7 @@ class RaftAlignerArguments(TrainingArguments):
         }
     )
     output_min_length: Optional[int] = field(
-        default=16,
+        default=64,
         metadata={
             "help": (
                 "minimum length of the output token sequence generated from"
@@ -554,7 +745,7 @@ class RaftAlignerArguments(TrainingArguments):
         },
     )
     output_max_length: Optional[int] = field(
-        default=48,
+        default=128,
         metadata={
             "help": (
                 "maximum length of the output token sequence generated from"
@@ -569,15 +760,14 @@ class RaftAlignerArguments(TrainingArguments):
         },
     )
     raft_batch_size: Optional[int] = field(
-        default=320,
+        default=1024,
         metadata={
             "help": (
-                "only select {raft_batch_size} samples each time to"
-                " generate rewards and be ranked for STF training."
+                "only select {raft_batch_size} samples each time for STF training."
             )
         },
     )
-    top_reward_percentage: Optional[int] = field(
+    top_reward_percentage: Optional[float] = field(
         default=0.2,
         metadata={
             "help": (
@@ -596,6 +786,35 @@ class RaftAlignerArguments(TrainingArguments):
             ),
         },
     )
+    collection_strategy: Optional[str] = field(
+        default="top",
+        metadata={
+            "help": (
+                "{collection_strategy} is either top or local"
+                " top means that we rank the samples globally regardless of the prompts"
+                " local means that we only rank the samples with the same prompt"
+            ),
+        },
+    )
+
+@dataclass
+class BenchmarkingArguments:
+    dataset_name: Optional[str] = field(
+        default=None,
+        metadata={
+            "help": "benchmark dataset name provided by lmflow"
+        },
+    )
+    lm_evaluation_metric: Optional[str] = field(
+        default="accuracy",
+        metadata={
+            "help": "the metric the model will be evaluated on",
+            "choices": ["acc", "acc_norm", "bleu", "chrf", "em", "f1", "ppl", \
+                "ter", "r@1", "r@2", "mrr", "mc1", "mc2", "word_perplexity", \
+                    "byte_perplexity", "bits_per_byte"],
+        },
+    )
+
 
 
 PIPELINE_ARGUMENT_MAPPING = {
