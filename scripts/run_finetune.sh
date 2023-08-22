@@ -8,7 +8,7 @@ if [ $# -ge 1 ]; then
   deepspeed_args="$1"
 fi
 
-exp_id=pretraining_pythia_1b_ft_v3_6m_reply_openai
+exp_id=pretraining_pythia_1b_ft_compression
 project_dir=$(cd "$(dirname $0)"/..; pwd)
 output_dir=${project_dir}/output_models/${exp_id}
 log_dir=${project_dir}/log/${exp_id}
@@ -16,7 +16,7 @@ log_dir=${project_dir}/log/${exp_id}
 
 # model=EleutherAI/pythia-1b-deduped
 # model=/home/ec2-user/SageMaker/repos/LMFlow/output_models/pretraining_pythia_1b/
-model=/home/ec2-user/SageMaker/repos/LMFlow/output_models/pretraining_pythia_1b_ft_v3_6m_reply_8806
+model=EleutherAI/pythia-1b-deduped
 
 
 ## pretraining data
@@ -27,8 +27,11 @@ model=/home/ec2-user/SageMaker/repos/LMFlow/output_models/pretraining_pythia_1b_
 # dataset_path=/home/ec2-user/SageMaker/repos/v3_6m_ticket_reply
 
 ## openai paraphrasing tasks
-dataset_path=/home/ec2-user/SageMaker/repos/openai_data
+#dataset_path=/home/ec2-user/SageMaker/repos/openai_data
 
+
+## compression data
+dataset_path=/home/yilu/workspace/repos/compressor/compressor/data/instruction_ft_data/ift_data
 
 mkdir -p ${output_dir} ${log_dir}
 
@@ -38,9 +41,9 @@ deepspeed ${deepspeed_args} \
     --cache_dir /home/ec2-user/SageMaker/repos/LMFlow/cache \
     --dataset_path ${dataset_path} \
     --output_dir ${output_dir} --overwrite_output_dir \
-    --num_train_epochs 1 \
+    --num_train_epochs 4 \
     --learning_rate 2e-5 \
-    --block_size 512 \
+    --block_size 2048 \
     --per_device_train_batch_size 2 \
     --gradient_accumulation_steps 4 \
     --deepspeed configs/ds_config_zero3.json \

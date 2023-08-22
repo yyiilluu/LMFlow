@@ -13,19 +13,19 @@ project_dir=$(cd "$(dirname $0)"/..; pwd)
 output_dir=${project_dir}/output_models/${exp_id}
 log_dir=${project_dir}/log/${exp_id}
 
-dataset_path=/home/ec2-user/SageMaker/repos/test_data/processed
+dataset_path=/home/yilu/workspace/repos/compressor/compressor/data/instruction_ft_data/ift_data
 # dataset_path=/home/ec2-user/SageMaker/repos/small_data
 
 mkdir -p ${output_dir} ${log_dir}
 
 torchrun --nproc_per_node 8 examples/finetune.py \
-    --model_name_or_path EleutherAI/pythia-6.9b-deduped \
+    --model_name_or_path EleutherAI/pythia-1b-deduped \
     --dataset_path ${dataset_path} \
     --output_dir ${output_dir} --overwrite_output_dir \
     --num_train_epochs 1 \
     --learning_rate 2e-5 \
     --block_size 2048 \
-    --per_device_train_batch_size 2 \
+    --per_device_train_batch_size 1 \
     --gradient_accumulation_steps 8 \
     --fp16 \
     --validation_split_percentage 0 \
