@@ -15,9 +15,9 @@ from tqdm import tqdm
 from transformers import AutoConfig
 from transformers import HfArgumentParser
 
-from examples.compressor_util.structs import QAExample, count_token
 from lmflow.args import ModelArguments, DatasetArguments, AutoArguments
 from lmflow.models.auto_model import AutoModel
+from lmflow.utils.compressor_util.structs import QAExample, count_token
 from lmflow.utils.data_utils import set_random_seed
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"  # To avoid warnings about parallelism in tokenizers
