@@ -4,6 +4,7 @@
 import json
 import os
 from string import Template
+from typing import List
 
 import deepspeed
 import pandas as pd
@@ -14,16 +15,17 @@ from tqdm import tqdm
 from transformers import AutoConfig
 from transformers import HfArgumentParser
 
+from examples.compressor_util.structs import QAExample, count_token
 from lmflow.args import ModelArguments, DatasetArguments, AutoArguments
 from lmflow.models.auto_model import AutoModel
 from lmflow.utils.data_utils import set_random_seed
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"  # To avoid warnings about parallelism in tokenizers
 
-model_path = "/home/ec2-user/SageMaker/repos/LMFlow/output_models/pretraining_pythia_1b_ift_compress_decompress_16k"
-input_file_path = "/home/ec2-user/SageMaker/repos/compressor/data/nq-dev-processed-pos-only_all_qa_gpt-3.5-turbo-0613.jsonl"
+input_file_path = "/home/ec2-user/SageMaker/repos/LMFlow/data/compression_test/nq-train-processed-pos-only-tail100.jsonl"
 output_file_path = "/home/ec2-user/SageMaker/repos/compressor/data/sample_output.csv"
 prompt_template_name = "compression"
+eval_limit = 10
 
 PROMPT_TEMPLATES = {
     "compression": """
@@ -73,6 +75,7 @@ Original content:
 
 prompt_template = Template(PROMPT_TEMPLATES[prompt_template_name])
 
+
 class InteractiveEvaluator:
     def __init__(self, model, model_args, evaluator_args):
         self.model = model
@@ -99,6 +102,37 @@ class InteractiveEvaluator:
 
         print(f"model_hidden_size = {self.model_hidden_size}")
 
+    @staticmethod
+    def enforce_stop_tokens(text: str, stop: List[str]) -> str:
+        """Cut off the text as soon as any stop words occur."""
+        first_index = len(text)
+        if stop:
+            for s in stop:
+                if s in text:
+                    first_index = min(text.index(s), first_index)
+
+        return text[:first_index].strip()
+
+    def parse_generation(
+        self,
+        generations: List[str],
+        prompts: List[str],
+        stop: List[str] = None,
+        include_prompt: bool = True,
+    ) -> List[str]:
+        texts = []
+        for text, prompt in zip(generations, prompts):
+            if not include_prompt:
+                text = text[len(prompts):]
+
+            # it is better to have a default stop token so model does not always generate to max
+            # sequence length
+            text = self.enforce_stop_tokens(text=text, stop=stop)
+
+            texts.append(text)
+
+        return texts
+
     def interactive_evaluate(self):
         while True:
             text = input("Enter prompt: ")
@@ -113,32 +147,49 @@ class InteractiveEvaluator:
 
     def inference(self, input_file_path):
         prompts = []
+        examples = []
         with open(input_file_path) as f:
-            for line in f:
-                ex = json.loads(line)
+            for i, line in enumerate(f):
+                if i > eval_limit:
+                    break
+                ex = QAExample.from_dict(json.loads(line))
+                examples.append(ex)
                 prompts.append(prompt_template.substitute(
                     **{
-                        "content": ex['qa_example']['text']
+                        "content": ex.text
                     }
                 ))
 
         generations = []
-        prompts = prompts[:10]
         for prompt in tqdm(prompts):
             inputs = self.model.encode(prompt, return_tensors="pt").to(device=self.local_rank)
             with torch.inference_mode():
                 outputs = self.model.inference(inputs, max_new_tokens=100, temperature=0.0)
-                generations.append(self.model.decode(outputs[0], skip_special_tokens=True))
+                generations.append(
+                    self.parse_generation(
+                        generations=[self.model.decode(outputs[0], skip_special_tokens=True)],
+                        prompts=[prompt],
+                        include_prompt=False)
+                )
 
         data = []
-        for gen, prompt in zip(generations, prompts):
+        for gen, prompt, example in zip(generations, prompts, examples):
+            example.compressed_text = gen
+            example.compressed_text_len = count_token(gen)
             data.append({
                 "prompt": prompt,
                 "generation": gen,
+                "qa_example": example.__dict__
             })
 
         df = pd.DataFrame(data)
         df.to_csv(output_file_path, index=False)
+
+        example_df = pd.DataFrame([ex.__dict__ for ex in examples])
+        print("Original text length:")
+        print(example_df.text_len.describe())
+        print("\nCompressed text length:")
+        print(example_df.compressed_text_len.describe())
 
 
 if __name__ == '__main__':
@@ -157,4 +208,3 @@ if __name__ == '__main__':
 
     # interactive_evaluator.interactive_evaluate()
     interactive_evaluator.inference(input_file_path)
-
